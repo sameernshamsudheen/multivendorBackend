@@ -44,7 +44,7 @@ export const userRegistration = asyncHandler(async (req, res, next) => {
     const data = { user: savedUser.name };
     const templatepath = path.join(
       __dirname,
-      "../../../emailtemplate/userregistration.ejs"
+      "../../emailtemplate/userregistration.ejs"
     );
 
     try {
@@ -63,4 +63,39 @@ export const userRegistration = asyncHandler(async (req, res, next) => {
   } catch (error) {
     throw new ApiError(500, error.message);
   }
+});
+
+//@desc login a new user
+//@router /api/users
+//@access Public
+
+export const userLogin = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+
+   console.log(email ,"emaill===");
+   
+
+  if ([email, password].some((field) => field?.trim() === " ")) {
+    throw new ApiError(500, "All fields are required");
+  }
+
+  const userExists = await User.findOne({ email });
+   console.log(userExists,"euse");
+   
+  if (!userExists) {
+    throw new ApiError(500, "User not found please signup");
+  }
+  const passwordMatch = await userExists.comparePassword(
+    password,
+    userExists.password
+  );
+
+  if (!passwordMatch) {
+    throw new ApiError(
+      500,
+      "Password  incorrect please provide the  correct password"
+    );
+  }
+
+  console.log("passs");
 });

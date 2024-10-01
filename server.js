@@ -3,8 +3,18 @@ import "dotenv/config";
 import connectDb from "./db/db.js";
 import cors from "cors";
 import userRouter from "./routes/user.routes.js";
+import logger from "./logger/logger.js";
+import morgan from "morgan";
+import morganMiddleware from "./middleware/logmiddleware.js";
+import helmet from "helmet";
+import clearLogs from "./utils/clearlogs.js";
+import cron  from "node-cron"
+
+import ErrorHandler from "./middleware/ErrorHandler.js";
 
 const app = express();
+
+app.use(morganMiddleware);
 
 app.use(
   cors({
@@ -12,13 +22,20 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
+app.use(helmet());
 app.use(express.json());
 
 app.use("/api/v1", userRouter);
+app.use(ErrorHandler);
+cron.schedule('0 0 * * *', () => {
+  console.log("Running cron job to clear logs...");
+  clearLogs(); // Call the clearLogs function here
+});
 connectDb()
   .then(() => {
     app.listen(process.env.PORT, () => {
       console.log(`server Started at ${process.env.PORT}`);
+
     });
   })
   .catch((error) => {
