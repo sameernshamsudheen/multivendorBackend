@@ -10,6 +10,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import sendToken from "../../utils/sendtoken.js";
+import redis from "../../redis/redis.js";
 
 //@desc Register a new user
 //@router /api/users
@@ -21,13 +22,13 @@ export const userRegistration = asyncHandler(async (req, res, next) => {
 
   try {
     const { name, email, password, address, phone } = req.body;
-    if ([name, email, password].some((field) => field?.trim() === "")) {
-      throw new ApiError(400, "All fields are required");
-    }
+    // if ([name, email, password].some((field) => field?.trim() === "")) {
+    //   throw new ApiError(400, "All fields are required");
+    // }
     const emailExists = await User.findOne({ email: email });
 
     if (emailExists) {
-      throw new ApiError(400, "email already exists");
+      throw new ApiError(500, "email already exists");
     }
     const savedUser = await User.create({
       name,
@@ -92,5 +93,118 @@ export const userLogin = asyncHandler(async (req, res, next) => {
     );
   }
 
-  sendToken(user ,res);
+  sendToken(user, res);
+});
+
+//@desc get user profile
+//@router /api/users
+//@access valid users
+
+export const getUserProfile = asyncHandler(async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    if (!currentUser) {
+      throw new ApiError(500, "Invalid  user");
+    }
+
+    const user = await User.findById(currentUser._id.toString()).select(
+      "-password "
+    );
+
+    if (!user) {
+      throw new ApiError(500, "User not found");
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, "user profile fetched successfully"));
+  } catch (error) {
+    throw new ApiError(500, error.message);
+  }
+});
+
+//@desc update user profile
+//@router /api/users
+//@access valid users
+
+export const updateUserProfile = asyncHandler(async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+
+    if (!currentUser) {
+      throw new ApiError(500, "Invalid  user");
+    }
+    const user = await User.findById(currentUser._id.toString()).select(
+      "-password"
+    );
+    if (!user) {
+      throw new ApiError(500, "User not found");
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      currentUser._id.toString(),
+      req.body,
+      { new: true }
+    ).select("-password -role -isActive");
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, updatedUser, "user profile updated successfully")
+      );
+  } catch (error) {
+    throw new ApiError(500, error.message);
+  }
+});
+
+export const deleteUser = asyncHandler(async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    const userToBeDeletedId = req.params.id;
+
+    if (!currentUser) {
+      throw new ApiError(500, "Invalid  user");
+    }
+    const user = await User.findById(currentUser._id.toString()).select(
+      "-password"
+    );
+    if (!user) {
+      throw new ApiError(500, "User not found");
+    }
+    const userToBeDeletedExists = await User.findById(
+      userToBeDeletedId.toString()
+    ).select("-password");
+
+    if (!userToBeDeletedExists) {
+      throw new ApiError(500, " User to be deleted  not found");
+    }
+    const result = await redis.del(userToBeDeletedId.toString());
+
+    console.log(result, "====result======");
+
+    const deletedUser = await User.findByIdAndDelete(
+      userToBeDeletedId.toString()
+    );
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, deletedUser, "User deleted successfully"));
+  } catch (error) {
+    throw new ApiError(500, error.message);
+  }
+});
+export const getAllUser = asyncHandler(async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+
+    if (!currentUser) {
+      throw new ApiError(500, "Invalid  user");
+    }
+
+    const AllUsers = await User.find();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, AllUsers, "All users fetched"));
+  } catch (error) {
+    throw new ApiError(500, error.message);
+  }
 });
