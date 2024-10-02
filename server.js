@@ -8,11 +8,14 @@ import morgan from "morgan";
 import morganMiddleware from "./middleware/logmiddleware.js";
 import helmet from "helmet";
 import clearLogs from "./utils/clearlogs.js";
-import cron  from "node-cron"
+import cron from "node-cron";
+import cookieParser from "cookie-parser";
 
 import ErrorHandler from "./middleware/ErrorHandler.js";
+import redis from "./redis/redis.js";
 
 const app = express();
+app.use(cookieParser());
 
 app.use(morganMiddleware);
 
@@ -27,7 +30,7 @@ app.use(express.json());
 
 app.use("/api/v1", userRouter);
 app.use(ErrorHandler);
-cron.schedule('0 0 * * *', () => {
+cron.schedule("0 0 * * *", () => {
   console.log("Running cron job to clear logs...");
   clearLogs(); // Call the clearLogs function here
 });
@@ -35,7 +38,6 @@ connectDb()
   .then(() => {
     app.listen(process.env.PORT, () => {
       console.log(`server Started at ${process.env.PORT}`);
-
     });
   })
   .catch((error) => {

@@ -9,6 +9,8 @@ import sendMail from "../../utils/sendmail.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import sendToken from "../../utils/sendtoken.js";
+
 //@desc Register a new user
 //@router /api/users
 //@access Public
@@ -72,23 +74,16 @@ export const userRegistration = asyncHandler(async (req, res, next) => {
 export const userLogin = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
-   console.log(email ,"emaill===");
-   
-
   if ([email, password].some((field) => field?.trim() === " ")) {
     throw new ApiError(500, "All fields are required");
   }
 
-  const userExists = await User.findOne({ email });
-   console.log(userExists,"euse");
-   
-  if (!userExists) {
+  const user = await User.findOne({ email });
+
+  if (!user) {
     throw new ApiError(500, "User not found please signup");
   }
-  const passwordMatch = await userExists.comparePassword(
-    password,
-    userExists.password
-  );
+  const passwordMatch = await user.comparePassword(password, user.password);
 
   if (!passwordMatch) {
     throw new ApiError(
@@ -97,5 +92,5 @@ export const userLogin = asyncHandler(async (req, res, next) => {
     );
   }
 
-  console.log("passs");
+  sendToken(user ,res);
 });
