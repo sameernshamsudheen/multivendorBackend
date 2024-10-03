@@ -3,6 +3,7 @@ import {
   deleteUser,
   getAllUser,
   getUserProfile,
+  refreshAccessToken,
   updateUserProfile,
   userLogin,
   userRegistration,
@@ -14,9 +15,10 @@ const userRouter = express.Router();
 
 userRouter.post("/user-register", userRegistration);
 userRouter.post("/user-login", userLogin);
-userRouter.get("/user-profile", getUserProfile);
+userRouter.get("/user-profile", isAuthenticated, getUserProfile);
 userRouter.put("/user-profile", isAuthenticated, updateUserProfile);
 userRouter.delete("/user/:id", isAuthenticated, authorize("admin"), deleteUser);
 userRouter.get("/user-all", isAuthenticated, authorize("admin"), getAllUser);
+userRouter.get("/user-refresh-token", refreshAccessToken);
 
 export default userRouter;

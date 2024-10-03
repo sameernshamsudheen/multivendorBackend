@@ -3,7 +3,7 @@ import ApiError from "./apierror.js";
 import { ApiResponse } from "./apiresponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
-const sendToken = asyncHandler(async (user, res) => {
+const sendToken = asyncHandler(async (user, res, refresh) => {
   const accessTokenExpire = 30 * 60 * 1000;
   const refreshTokenExpire = 2 * 24 * 60 * 60 * 1000;
   const accessTokenOptions = {
@@ -23,16 +23,13 @@ const sendToken = asyncHandler(async (user, res) => {
     const refreshToken = user.generateRefreshToken();
     //redis session create
 
-
     await redis.set(user._id.toString(), JSON.stringify(user), { ex: 172800 });
 
     //setting to cookies
     res.cookie("access_token", accessToken, accessTokenOptions);
     res.cookie("refresh_token", refreshToken, refreshTokenOptions);
-
-    return res
-      .status(200)
-      .json(new ApiResponse(200, accessToken, "login Successfull"));
+    const message = refresh ? "token refresh successful" : "login successful";
+    return res.status(200).json(new ApiResponse(200, accessToken, message));
   } catch (error) {
     throw new ApiError(500, error.message);
   }

@@ -1,6 +1,5 @@
 import { User } from "../../models/usermodal.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import { ApiResponse } from "../../utils/apiresponse.js";
 import ApiError from "../../utils/apierror.js";
@@ -8,6 +7,7 @@ import ejs from "ejs";
 import sendMail from "../../utils/sendmail.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import jwt from "jsonwebtoken";
 
 import sendToken from "../../utils/sendtoken.js";
 import redis from "../../redis/redis.js";
@@ -74,6 +74,7 @@ export const userRegistration = asyncHandler(async (req, res, next) => {
 
 export const userLogin = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
+  const refresh=false
 
   if ([email, password].some((field) => field?.trim() === " ")) {
     throw new ApiError(500, "All fields are required");
@@ -93,7 +94,7 @@ export const userLogin = asyncHandler(async (req, res, next) => {
     );
   }
 
-  sendToken(user, res);
+  sendToken(user, res  ,refresh);
 });
 
 //@desc get user profile
@@ -154,7 +155,9 @@ export const updateUserProfile = asyncHandler(async (req, res, next) => {
     throw new ApiError(500, error.message);
   }
 });
-
+//@desc delete user
+//@router /api/user
+//@access admin
 export const deleteUser = asyncHandler(async (req, res, next) => {
   try {
     const currentUser = req.user;
@@ -178,8 +181,6 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
     }
     const result = await redis.del(userToBeDeletedId.toString());
 
-    console.log(result, "====result======");
-
     const deletedUser = await User.findByIdAndDelete(
       userToBeDeletedId.toString()
     );
@@ -191,6 +192,10 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
     throw new ApiError(500, error.message);
   }
 });
+
+//@desc get all user
+//@router /api/user-all
+//@access admin
 export const getAllUser = asyncHandler(async (req, res, next) => {
   try {
     const currentUser = req.user;
@@ -204,6 +209,36 @@ export const getAllUser = asyncHandler(async (req, res, next) => {
     return res
       .status(200)
       .json(new ApiResponse(200, AllUsers, "All users fetched"));
+  } catch (error) {
+    throw new ApiError(500, error.message);
+  }
+});
+//@desc refresh access token
+//@router /api/user-all
+//@access  valid users
+export const refreshAccessToken = asyncHandler(async (req, res, next) => {
+  try {
+    const refresh = true;
+    const incomingRefreshToken =
+      req.cookies.refresh_token || req.body.refresh_token;
+    if (!incomingRefreshToken) {
+      throw new ApiError(500, "  refresh token not  found");
+    }
+
+    const decoded = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+    if (!decoded) {
+      throw new ApiError(500, " Invalid token");
+    }
+
+    const user = await User.findById(decoded?._id.toString());
+    if (!user) {
+      throw new ApiError(401, "User not found");
+    }
+
+    sendToken(user, res ,refresh);
   } catch (error) {
     throw new ApiError(500, error.message);
   }
