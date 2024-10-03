@@ -13,6 +13,7 @@ import cookieParser from "cookie-parser";
 
 import ErrorHandler from "./middleware/ErrorHandler.js";
 import redis from "./redis/redis.js";
+import vendorRouter from "./routes/vendor.routes.js";
 
 const app = express();
 app.use(cookieParser());
@@ -28,7 +29,7 @@ app.use(
 app.use(helmet());
 app.use(express.json());
 
-app.use("/api/v1", userRouter);
+app.use("/api/v1", userRouter ,vendorRouter);
 app.use(ErrorHandler);
 cron.schedule("0 0 * * *", () => {
   console.log("Running cron job to clear logs...");

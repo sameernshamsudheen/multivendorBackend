@@ -25,7 +25,7 @@ const subscriptionSchema = new mongoose.Schema(
 const vendorSchema = new mongoose.Schema(
   {
     user: {
-      type: mongoose.Schema.types.Objectid,
+      type: mongoose.Schema.Types.ObjectId, 
       ref: "User",
       required: true,
     },
@@ -47,7 +47,7 @@ const vendorSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    products: [{ type: mongoose.Schema.Types.Objectid, ref: "Product" }],
+    products: [{  type: mongoose.Schema.Types.ObjectId,  ref: "Product" }],
     subscription: subscriptionSchema,
   },
   { timeStamps: true }
