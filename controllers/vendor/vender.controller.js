@@ -6,18 +6,15 @@ import { User } from "../../models/usermodal.js";
 import { Vendor } from "../../models/vendormodel.js";
 import sendMail from "../../utils/sendmail.js";
 import { ApiResponse } from "../../utils/apiresponse.js";
+import uploadToCloudinary from "../../utils/cloudinary.js";
 
 export const vendorRegistration = asyncHandler(async (req, res, next) => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
   try {
-    const { storeName, storeDescription, storeImage, subscription } = req.body;
-    if (
-      [storeName, storeDescription, storeImage].some(
-        (field) => field?.trim() === ""
-      )
-    ) {
+    const { storeName, storeDescription, subscription } = req.body;
+    if ([storeName, storeDescription].some((field) => field?.trim() === "")) {
       throw new ApiError(400, "All fields are required");
     }
     const userExists = await User.findById(req.user?._id);
@@ -33,16 +30,19 @@ export const vendorRegistration = asyncHandler(async (req, res, next) => {
       throw new ApiError(500, "Already a vendor");
     }
 
+    const storeImageLocalPath = req.files?.storeImage[0]?.path;
+
+    const storeImage = await uploadToCloudinary(storeImageLocalPath);
+
     const newVendor = new Vendor({
       user: req.user?._id,
       storeName,
       storeDescription,
-      storeImage,
+      storeImage: storeImage?.url || "",
       subscription,
     });
 
     const savedVendor = await newVendor.save();
-    console.log(savedVendor, "===savedVendor");
 
     if (!savedVendor) {
       throw new ApiError(500, " user not found");
