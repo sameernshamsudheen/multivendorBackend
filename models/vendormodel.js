@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slugify from "slugify";
 
 const subscriptionSchema = new mongoose.Schema(
   {
@@ -25,7 +26,7 @@ const subscriptionSchema = new mongoose.Schema(
 const vendorSchema = new mongoose.Schema(
   {
     user: {
-      type: mongoose.Schema.Types.ObjectId, 
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
@@ -33,6 +34,10 @@ const vendorSchema = new mongoose.Schema(
     storeName: {
       type: String,
       required: true,
+      unique: true,
+    },
+    storeSlug: {
+      type: String,
       unique: true,
     },
     storeDescription: {
@@ -47,10 +52,16 @@ const vendorSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    products: [{  type: mongoose.Schema.Types.ObjectId,  ref: "Product" }],
+    products: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     subscription: subscriptionSchema,
   },
   { timeStamps: true }
 );
-
-export const Vendor =  mongoose.model("Vendor",vendorSchema)
+vendorSchema.pre("save", function (next) {
+  if (this.isModified("storeName")) {
+    // Only generate slug if storeName is modified
+    this.storeSlug = slugify(this.storeName, { lower: true, strict: true });
+  }
+  next();
+});
+export const Vendor = mongoose.model("Vendor", vendorSchema);

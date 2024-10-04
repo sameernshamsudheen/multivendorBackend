@@ -74,7 +74,7 @@ export const userRegistration = asyncHandler(async (req, res, next) => {
 
 export const userLogin = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
-  const refresh=false
+  const refresh = false;
 
   if ([email, password].some((field) => field?.trim() === " ")) {
     throw new ApiError(500, "All fields are required");
@@ -94,7 +94,7 @@ export const userLogin = asyncHandler(async (req, res, next) => {
     );
   }
 
-  sendToken(user, res  ,refresh);
+  sendToken(user, res, refresh);
 });
 
 //@desc get user profile
@@ -206,6 +206,10 @@ export const getAllUser = asyncHandler(async (req, res, next) => {
 
     const AllUsers = await User.find();
 
+    if (AllUsers.length === 0) {
+      throw new ApiError(500, "No users found");
+    }
+
     return res
       .status(200)
       .json(new ApiResponse(200, AllUsers, "All users fetched"));
@@ -238,7 +242,7 @@ export const refreshAccessToken = asyncHandler(async (req, res, next) => {
       throw new ApiError(401, "User not found");
     }
 
-    sendToken(user, res ,refresh);
+    sendToken(user, res, refresh);
   } catch (error) {
     throw new ApiError(500, error.message);
   }
