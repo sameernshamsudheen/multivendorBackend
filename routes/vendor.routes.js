@@ -9,6 +9,7 @@ import {
 import isAuthenticated from "../middleware/isauthenticated.js";
 import { upload } from "../middleware/multermiddleware.js";
 import authorize from "../middleware/authorize.js";
+import { updateProduct } from "../controllers/product/product.controller.js";
 
 const vendorRouter = express.Router();
 
@@ -44,6 +45,12 @@ vendorRouter.delete(
   isAuthenticated,
   authorize("vendor"),
   deleteVendor
+);
+vendorRouter.put(
+  "/vendor-update",
+  isAuthenticated,
+  authorize("vendor"),
+  updateProduct
 );
 
 export default vendorRouter;
