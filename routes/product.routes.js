@@ -32,8 +32,8 @@ productRouter.put(
 );
 productRouter.delete(
   "/product/:id",
-  isAuthenticated,y
-  
+  isAuthenticated,
+
   authorize("vendor"),
 
   deleteProduct
