@@ -9,6 +9,7 @@ import { ApiResponse } from "../../utils/apiresponse.js";
 import uploadToCloudinary from "../../utils/cloudinary.js";
 import destroyImage from "../../utils/cloudinaryDestroy.js";
 import getPublicIdFromUrl from "../../helper/getPublicIdFromUrl.js";
+import redis from "../../redis/redis.js";
 
 export const vendorRegistration = asyncHandler(async (req, res, next) => {
   const __filename = fileURLToPath(import.meta.url);
@@ -58,7 +59,14 @@ export const vendorRegistration = asyncHandler(async (req, res, next) => {
     if (!currentVendorRelatedUser) {
       throw new ApiError(500, " Related user not found");
     }
-
+    const userRoleChangeRedis = await redis.get(
+      currentVendorRelatedUser._id.toString()
+    );
+    userRoleChangeRedis.role = "vendor";
+    await redis.set(
+      currentVendorRelatedUser._id.toString(),
+      JSON.stringify(userRoleChangeRedis)
+    );
     currentVendorRelatedUser.role = "vendor";
     await currentVendorRelatedUser.save();
 
@@ -225,6 +233,16 @@ export const deleteVendor = asyncHandler(async (req, res, next) => {
     if (!currentVendorRelatedUser) {
       throw new ApiError(500, " Related user not found");
     }
+    const userRoleChangeRedis = await redis.get(
+      currentVendorRelatedUser._id.toString()
+    );
+    console.log(userRoleChangeRedis, "===delete api");
+
+    userRoleChangeRedis.role = "user";
+    await redis.set(
+      currentVendorRelatedUser._id.toString(),
+      JSON.stringify(userRoleChangeRedis)
+    );
     currentVendorRelatedUser.role = "user";
     await currentVendorRelatedUser.save();
     return res

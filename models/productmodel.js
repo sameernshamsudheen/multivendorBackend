@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slugify from "slugify";
 
 const productVariationSchema = new mongoose.Schema({
   color: {
@@ -26,27 +27,35 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    productSlug: {
+      type: String,
+      unique: true,
+    },
     description: {
       type: String,
       required: true,
     },
     vendor: {
-      type: mongoose.Schema.types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",
     },
     category: {
-      type: mongoose.Schema.types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
     },
     subcategory: {
-      type: mongoose.Schema.types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
     },
     brand: {
-      type: mongoose.Schema.types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Brand",
     },
-    image: [String],
+    image: {
+      type: [String],
+      required: true,
+    },
+
     variations: [productVariationSchema],
     ratingAverage: {
       type: Number,
@@ -65,5 +74,11 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+productSchema.pre("save", function (next) { 
+  if (this.isModified("name")) {
+    // Only generate slug if storeName is modified
+    this.productSlug = slugify(this.name, { lower: true, strict: true });
+  }
+  next();
+});
 export const Product = mongoose.model("Product", productSchema);
