@@ -15,6 +15,9 @@ import ErrorHandler from "./middleware/ErrorHandler.js";
 import redis from "./redis/redis.js";
 import vendorRouter from "./routes/vendor.routes.js";
 import productRouter from "./routes/product.routes.js";
+import brandRouter from "./routes/brand.routes.js";
+import subCategoryRouter from "./routes/subcategory.routes.js";
+import CategoryRouter from "./routes/categories.routes.js";
 
 const app = express();
 app.use(cookieParser());
@@ -30,7 +33,15 @@ app.use(
 app.use(helmet());
 app.use(express.json());
 
-app.use("/api/v1", userRouter ,vendorRouter ,productRouter);
+app.use(
+  "/api/v1",
+  userRouter,
+  vendorRouter,
+  productRouter,
+  brandRouter,
+  subCategoryRouter,
+  CategoryRouter
+);
 app.use(ErrorHandler);
 cron.schedule("0 0 * * *", () => {
   console.log("Running cron job to clear logs...");
