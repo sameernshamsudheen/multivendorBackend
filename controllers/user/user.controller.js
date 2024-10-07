@@ -247,3 +247,19 @@ export const refreshAccessToken = asyncHandler(async (req, res, next) => {
     throw new ApiError(500, error.message);
   }
 });
+
+export const userLogout = asyncHandler(async (req, res, next) => {
+  try {
+    res.cookie("access_token", " ", { maxAge: 1 });
+    res.cookie("refresh_token", " ", { maxAge: 1 });
+    const userId = req.user?._id || "";
+
+    redis.del(userId);
+    res.status(200).json({
+      success: true,
+      message: "user logout successFull",
+    });
+  } catch (error) {
+    throw new ApiError(500, error.message);
+  }
+});

@@ -215,7 +215,6 @@ export const deleteVendor = asyncHandler(async (req, res, next) => {
     }
 
     const vendor = await Vendor.findOne({ user: currentUser._id });
-    console.log(vendor, "=====currentVendor");
 
     if (!vendor) {
       throw new ApiError(500, "Vendor not found");
@@ -254,3 +253,4 @@ export const deleteVendor = asyncHandler(async (req, res, next) => {
     throw new ApiError(500, error.message);
   }
 });
+
