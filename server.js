@@ -18,6 +18,7 @@ import productRouter from "./routes/product.routes.js";
 import brandRouter from "./routes/brand.routes.js";
 import subCategoryRouter from "./routes/subcategory.routes.js";
 import CategoryRouter from "./routes/categories.routes.js";
+import whishlistRouter from "./routes/wishlist.routes.js";
 
 const app = express();
 app.use(cookieParser());
@@ -40,7 +41,8 @@ app.use(
   productRouter,
   brandRouter,
   subCategoryRouter,
-  CategoryRouter
+  CategoryRouter,
+  whishlistRouter
 );
 app.use(ErrorHandler);
 cron.schedule("0 0 * * *", () => {
