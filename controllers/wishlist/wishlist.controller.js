@@ -4,6 +4,7 @@ import ApiError from "../../utils/apierror.js";
 
 import { ApiResponse } from "../../utils/apiresponse.js";
 import { Wishlist } from "../../models/wishlistmodel.js";
+// import { sendWebSocketNotification } from "../../websocket/notification.js";
 
 export const AddToWhishlist = asyncHandler(async (req, res, next) => {
   try {
@@ -22,10 +23,10 @@ export const AddToWhishlist = asyncHandler(async (req, res, next) => {
         products: [productId],
       });
       await newWishlist.save();
-    //   sendWebSocketNotification(
-    //     currentUser._id,
-    //     `Product ${productId} was added to your wishlist.`
-    //   );
+      //   sendWebSocketNotification(
+      //     currentUser._id,
+      //     `Product ${productId} was added to your wishlist.`
+      //   );
       return res
         .status(200)
         .json(
