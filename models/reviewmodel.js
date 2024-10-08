@@ -3,13 +3,13 @@ import mongoose from "mongoose";
 const reviewSchema = new mongoose.Schema(
   {
     user: {
-      type: mongoose.Schema.types.Objectid,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     products: [
       {
-        type: mongoose.Schema.types.objectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
       },
     ],

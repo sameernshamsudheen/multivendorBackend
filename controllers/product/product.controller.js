@@ -58,7 +58,7 @@ export const getAllProduct = asyncHandler(async (req, res, next) => {
     if (!currentUser) {
       throw new ApiError(500, "Invalid  user");
     }
-    const AllProduct = await Product.find();
+    const AllProduct = await Product.find().populate("re");
     return res
       .status(200)
       .json(new ApiResponse(200, AllProduct, "created a product"));
