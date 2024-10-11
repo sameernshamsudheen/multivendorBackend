@@ -51,7 +51,7 @@ app.use(
 );
 app.use(ErrorHandler);
 cron.schedule("0 0 * * *", () => {
-  console.log("Running cron job to clear logs...");
+
   clearLogs(); // Call the clearLogs function here
 });
 connectDb()

@@ -65,7 +65,7 @@ export const updateBrand = asyncHandler(async (req, res, next) => {
       throw new ApiError(500, "Brand not found");
     }
     const publicId = brand.logo;
-    console.log(publicId, "===");
+
 
     const uploadBrandImage = req.files?.logo[0]?.path;
     if (!uploadBrandImage) {
@@ -73,7 +73,7 @@ export const updateBrand = asyncHandler(async (req, res, next) => {
     }
 
     const storeImageDestroy = await destroyImage(publicId);
-    console.log(storeImageDestroy, "===storeImageDestroy====");
+  
 
     if (storeImageDestroy.result === "not found") {
       throw new ApiError(500, "Something went wrong");

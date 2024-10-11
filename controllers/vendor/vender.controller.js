@@ -33,7 +33,7 @@ export const vendorRegistration = asyncHandler(async (req, res, next) => {
     }
 
     const storeImageLocalPath = req.files?.storeImage[0]?.path;
-    console.log(storeImageLocalPath, "====storeage image====");
+   
 
     const storeImage = await uploadToCloudinary(storeImageLocalPath);
     if (!storeImage) throw ApiError(500, "Image upload has some issues");
@@ -208,7 +208,7 @@ export const deleteVendor = asyncHandler(async (req, res, next) => {
   try {
     const currentUser = req.user;
 
-    console.log(currentUser, "===current user===");
+ 
 
     if (!currentUser) {
       throw new ApiError(500, "Invalid  user");
@@ -235,7 +235,7 @@ export const deleteVendor = asyncHandler(async (req, res, next) => {
     const userRoleChangeRedis = await redis.get(
       currentVendorRelatedUser._id.toString()
     );
-    console.log(userRoleChangeRedis, "===delete api");
+
 
     userRoleChangeRedis.role = "user";
     await redis.set(
